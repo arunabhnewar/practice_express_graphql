@@ -9,7 +9,8 @@ const { GraphQLEnumType,
     GraphQLString,
     GraphQLID,
     GraphQLScalarType,
-    GraphQLInputObjectType } = require("graphql");
+    GraphQLInputObjectType,
+    Kind } = require("graphql");
 const { users, posts } = require('../data');
 
 
@@ -24,6 +25,32 @@ const GenderEnumType = new GraphQLEnumType({
         },
         female: {
             value: "female"
+        }
+    }
+})
+
+
+
+// Date Type
+const DateType = new GraphQLScalarType({
+    name: "DateType",
+    description: "It shows a date",
+    parseValue: (value) => {
+        return value
+    },
+    parseLiteral: (AST) => {
+        if (AST.kind === Kind.STRING || AST.kind === Kind.INT) {
+            return AST.value;
+        } else {
+            throw GraphQLError(`${AST.value} is not a string or number`)
+        }
+    },
+    serialize: (value) => {
+        const date = new Date(value);
+        if (date.toString() === "Invalid Date") {
+            throw new GraphQLError(`${value} is not a valid date`)
+        } else {
+            return date.toLocaleDateString()
         }
     }
 })
@@ -65,6 +92,9 @@ const UserType = new GraphQLObjectType({
                     }
                 })
             }
+        },
+        createdAt: {
+            type: DateType
         }
 
     })
@@ -117,6 +147,9 @@ const UserTypeInput = new GraphQLInputObjectType({
         },
         email: {
             type: new GraphQLNonNull(GraphQLString)
+        },
+        createdAt: {
+            type: DateType
         }
     })
 })
@@ -213,6 +246,7 @@ const RootMutationType = new GraphQLObjectType({
                     gender,
                     phone,
                     email,
+                    createdAt,
                 } }) => {
                 const user = {
                     id: users.length + 1,
@@ -222,6 +256,7 @@ const RootMutationType = new GraphQLObjectType({
                     phone,
                     email,
                     posts: [],
+                    createdAt,
                 };
 
                 users.push(user);

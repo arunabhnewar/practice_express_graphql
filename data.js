@@ -7,8 +7,8 @@ const users = [
         phone: "0123456789",
         email: "jambbo@papa.com",
         posts: [1, 3],
-        // createdAt: "2023-01-22T18:47:59.894Z",
-        // password: "Jamboo@123",
+        createdAt: "2023-01-22T18:47:59.894Z",
+        password: "Jamboo@123",
     },
     {
         id: 2,
@@ -18,8 +18,8 @@ const users = [
         phone: "0987654321",
         email: "goolgool@papa.com",
         posts: [2],
-        // createdAt: "2023-01-22T18:47:59.894Z",
-        // password: "Goolgool@123",
+        createdAt: "2023-01-22T18:47:59.894Z",
+        password: "Goolgool@123",
     },
     {
         id: 3,
@@ -29,8 +29,8 @@ const users = [
         phone: "0654987321",
         email: "bruno@papa.com",
         posts: [4, 6],
-        // createdAt: "2023-01-22T18:47:59.894Z",
-        // password: "Bruno@123",
+        createdAt: "2023-01-22T18:47:59.894Z",
+        password: "Bruno@123",
     },
     {
         id: 4,
@@ -40,8 +40,8 @@ const users = [
         phone: "9873216540",
         email: "pipi@mama.com",
         posts: [5, 7],
-        // createdAt: "2023-01-22T18:47:59.894Z",
-        // password: "Pipi@123",
+        createdAt: "2023-01-22T18:47:59.894Z",
+        password: "Pipi@123",
     },
 ];
 
