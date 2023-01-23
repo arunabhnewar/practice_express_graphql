@@ -8,7 +8,8 @@ const { GraphQLEnumType,
     GraphQLObjectType,
     GraphQLString,
     GraphQLID,
-    GraphQLScalarType } = require("graphql");
+    GraphQLScalarType,
+    GraphQLInputObjectType } = require("graphql");
 const { users, posts } = require('../data');
 
 
@@ -96,6 +97,58 @@ const PostType = new GraphQLObjectType({
 
 
 
+
+// User Type Input
+const UserTypeInput = new GraphQLInputObjectType({
+    name: "UserTypeInput",
+    description: "Provide input to add a new user",
+    fields: () => ({
+        firstName: {
+            type: new GraphQLNonNull(GraphQLString)
+        },
+        lastName: {
+            type: new GraphQLNonNull(GraphQLString)
+        },
+        gender: {
+            type: new GraphQLNonNull(GenderEnumType)
+        },
+        phone: {
+            type: new GraphQLNonNull(GraphQLString)
+        },
+        email: {
+            type: new GraphQLNonNull(GraphQLString)
+        }
+    })
+})
+
+
+
+// Update User Input 
+const UpdateUserTypeInput = new GraphQLInputObjectType({
+    name: "UpdateUserTypeInput",
+    description: "Provide input to update an exist user",
+    fields: () => ({
+        firstName: {
+            type: GraphQLString,
+        },
+        lastName: {
+            type: GraphQLString,
+        },
+        gender: {
+            type: GenderEnumType,
+        },
+        phone: {
+            type: GraphQLString,
+        },
+        email: {
+            type: GraphQLString,
+        },
+    })
+})
+
+
+
+
 // Root query
 const RootQueryType = new GraphQLObjectType({
     name: "Query",
@@ -141,8 +194,113 @@ const RootQueryType = new GraphQLObjectType({
 
 
 
+// Root Mutation
+const RootMutationType = new GraphQLObjectType({
+    name: "Mutation",
+    description: "Root Mutation",
+    fields: () => ({
+        addUser: {
+            type: UserType,
+            args: {
+                input: {
+                    type: UserTypeInput,
+                },
+            },
+            resolve: (_, {
+                input: {
+                    firstName,
+                    lastName,
+                    gender,
+                    phone,
+                    email,
+                } }) => {
+                const user = {
+                    id: users.length + 1,
+                    firstName,
+                    lastName,
+                    gender,
+                    phone,
+                    email,
+                    posts: [],
+                };
+
+                users.push(user);
+                return user;
+            }
+        },
+        updateUser: {
+            type: UserType,
+            args: {
+                id: {
+                    type: GraphQLID
+                },
+                input: {
+                    type: UpdateUserTypeInput
+                },
+            },
+            resolve: (_, {
+                id,
+                input: {
+                    firstName,
+                    lastName,
+                    gender,
+                    phone,
+                    email } }) => {
+
+                let updatedUser = null;
+                users.forEach((user) => {
+
+                    if (user.id == id) {
+                        if (firstName) {
+                            user.firstName = firstName
+                        }
+                        if (lastName) {
+                            user.lastName = lastName
+                        }
+                        if (gender) {
+                            user.gender = gender
+                        }
+                        if (phone) {
+                            user.phone = phone
+                        }
+                        if (email) {
+                            user.email = email
+                        }
+
+                        updatedUser = user;
+                    }
+                });
+                return updatedUser;
+            },
+        },
+
+        deleteUser: {
+            type: GraphQLNonNull(GraphQLBoolean),
+            args: {
+                id: {
+                    type: GraphQLID
+                },
+            },
+            resolve: (_, { id }) => {
+                const index = users.findIndex((user) => user.id == id);
+
+                if (index >= 0) {
+                    users.splice(index, 1);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+    })
+})
+
+
 
 
 
 // Module Exports
-module.exports = RootQueryType;
+module.exports = {
+    RootQueryType,
+    RootMutationType
+};
