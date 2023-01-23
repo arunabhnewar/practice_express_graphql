@@ -31,33 +31,67 @@ const GenderEnumType = new GraphQLEnumType({
 
 
 
+// Date Valdation
+function dateValidation(value) {
+    const date = new Date(value);
+    if (date.toString() === "Invalid Date") {
+        throw new GraphQLError(`${value} is not a valid date`)
+    } else {
+        return date.toISOString()
+    }
+}
+
+
+
+
 // Date Type
 const DateType = new GraphQLScalarType({
     name: "DateType",
     description: "It shows a date",
-    parseValue: (value) => {
-        return value
-    },
+    parseValue: dateValidation,
     parseLiteral: (AST) => {
         if (AST.kind === Kind.STRING || AST.kind === Kind.INT) {
-            return AST.value;
+            return dateValidation(AST.value);
         } else {
             throw GraphQLError(`${AST.value} is not a string or number`)
         }
     },
-    serialize: (value) => {
-        const date = new Date(value);
-        if (date.toString() === "Invalid Date") {
-            throw new GraphQLError(`${value} is not a valid date`)
-        } else {
-            return date.toLocaleDateString()
-        }
-    }
+    serialize: dateValidation,
 })
 
 
 
-// Users Type Declare
+// email validation
+function emailValidate(email) {
+    let regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+
+    if (email.match(regex)) {
+        return email;
+    } else {
+        throw new GraphQLError(`${value} is not a valid email`)
+    }
+}
+
+
+
+// Email Type
+const EmailType = new GraphQLScalarType({
+    name: "EmailType",
+    description: "Its for email",
+    parseValue: emailValidate,
+    parseLiteral: (AST) => {
+        if (AST.kind === Kind.STRING) {
+            return emailValidate(AST.value);
+        } else {
+            throw GraphQLError(`${AST.value} is not a string`)
+        }
+    },
+    serialize: emailValidate,
+})
+
+
+
+// Users Type 
 const UserType = new GraphQLObjectType({
     name: "User",
     description: "Single User data",
@@ -78,7 +112,7 @@ const UserType = new GraphQLObjectType({
             type: new GraphQLNonNull(GraphQLString)
         },
         email: {
-            type: new GraphQLNonNull(GraphQLString)
+            type: new GraphQLNonNull(EmailType)
         },
         posts: {
             type: new GraphQLList(new GraphQLNonNull(PostType)),
@@ -102,7 +136,7 @@ const UserType = new GraphQLObjectType({
 
 
 
-// Post Type Declare
+// Post Type 
 const PostType = new GraphQLObjectType({
     name: "Post",
     description: "User Post",
@@ -146,7 +180,7 @@ const UserTypeInput = new GraphQLInputObjectType({
             type: new GraphQLNonNull(GraphQLString)
         },
         email: {
-            type: new GraphQLNonNull(GraphQLString)
+            type: new GraphQLNonNull(EmailType)
         },
         createdAt: {
             type: DateType
@@ -156,7 +190,7 @@ const UserTypeInput = new GraphQLInputObjectType({
 
 
 
-// Update User Input 
+// Update User Type Input 
 const UpdateUserTypeInput = new GraphQLInputObjectType({
     name: "UpdateUserTypeInput",
     description: "Provide input to update an exist user",
