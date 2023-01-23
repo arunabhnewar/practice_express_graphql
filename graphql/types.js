@@ -43,21 +43,16 @@ function dateValidation(value) {
 
 
 
+// Password Validation
+function passwordValidation(password) {
+    let pwdRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/;
 
-// Date Type
-const DateType = new GraphQLScalarType({
-    name: "DateType",
-    description: "It shows a date",
-    parseValue: dateValidation,
-    parseLiteral: (AST) => {
-        if (AST.kind === Kind.STRING || AST.kind === Kind.INT) {
-            return dateValidation(AST.value);
-        } else {
-            throw GraphQLError(`${AST.value} is not a string or number`)
-        }
-    },
-    serialize: dateValidation,
-})
+    if (pwdRegex.test(password)) {
+        return password
+    } else {
+        throw new GraphQLError(`Password is not strong`)
+    }
+}
 
 
 
@@ -74,6 +69,40 @@ function emailValidate(email) {
 
 
 
+// Date Type
+const DateType = new GraphQLScalarType({
+    name: "DateType",
+    description: "It shows a date",
+    parseValue: dateValidation,
+    parseLiteral: (AST) => {
+        if (AST.kind === Kind.STRING || AST.kind === Kind.INT) {
+            return dateValidation(AST.value);
+        } else {
+            throw new GraphQLError(`${AST.value} is not a string or number`)
+        }
+    },
+    serialize: dateValidation,
+})
+
+
+
+// Password Type
+const PasswordType = new GraphQLScalarType({
+    name: "PasswordType",
+    description: "Strong Password with 1 uppercase, 1 lowercase, 1 number",
+    parseValue: passwordValidation,
+    parseLiteral: (AST) => {
+        if (AST.kind === Kind.STRING) {
+            return passwordValidation(AST.value);
+        } else {
+            throw new GraphQLError(`Password is not string`)
+        }
+    },
+    // serialize: dateValidation,
+})
+
+
+
 // Email Type
 const EmailType = new GraphQLScalarType({
     name: "EmailType",
@@ -83,7 +112,7 @@ const EmailType = new GraphQLScalarType({
         if (AST.kind === Kind.STRING) {
             return emailValidate(AST.value);
         } else {
-            throw GraphQLError(`${AST.value} is not a string`)
+            throw new GraphQLError(`${AST.value} is not a string`)
         }
     },
     serialize: emailValidate,
@@ -129,6 +158,9 @@ const UserType = new GraphQLObjectType({
         },
         createdAt: {
             type: DateType
+        },
+        password: {
+            type: new GraphQLNonNull(PasswordType)
         }
 
     })
@@ -184,6 +216,9 @@ const UserTypeInput = new GraphQLInputObjectType({
         },
         createdAt: {
             type: DateType
+        },
+        password: {
+            type: new GraphQLNonNull(PasswordType)
         }
     })
 })
@@ -281,6 +316,7 @@ const RootMutationType = new GraphQLObjectType({
                     phone,
                     email,
                     createdAt,
+                    password,
                 } }) => {
                 const user = {
                     id: users.length + 1,
@@ -291,6 +327,7 @@ const RootMutationType = new GraphQLObjectType({
                     email,
                     posts: [],
                     createdAt,
+                    password,
                 };
 
                 users.push(user);
