@@ -9,7 +9,7 @@ const { GraphQLEnumType,
     GraphQLString,
     GraphQLID,
     GraphQLScalarType } = require("graphql");
-const users = require('../data');
+const { users, posts } = require('../data');
 
 
 
@@ -52,9 +52,48 @@ const UserType = new GraphQLObjectType({
         email: {
             type: new GraphQLNonNull(GraphQLString)
         },
+        posts: {
+            type: new GraphQLList(new GraphQLNonNull(PostType)),
+            resolve: (user) => {
+                return posts.filter((post) => {
+                    if (user.posts.includes(post.id)) {
+                        return true
+                    }
+                    {
+                        return false
+                    }
+                })
+            }
+        }
 
     })
 })
+
+
+
+// Post Type Declare
+const PostType = new GraphQLObjectType({
+    name: "Post",
+    description: "User Post",
+    fields: () => ({
+        id: {
+            type: new GraphQLNonNull(GraphQLID)
+        },
+        title: {
+            type: new GraphQLNonNull(GraphQLString)
+        },
+        description: {
+            type: new GraphQLNonNull(GraphQLString)
+        },
+        user: {
+            type: UserType,
+            resolve: (post, args) => {
+                return users.find((user) => user.id == post.user);
+            }
+        }
+    })
+})
+
 
 
 // Root query
@@ -78,6 +117,23 @@ const RootQueryType = new GraphQLObjectType({
             resolve: (_, { id }) => {
                 const user = users.find((user) => user.id == id);
                 return user;
+            }
+        },
+        posts: {
+            type: new GraphQLList(new GraphQLNonNull(PostType)),
+            resolve: () => {
+                return posts;
+            },
+        },
+        post: {
+            type: PostType,
+            args: {
+                id: {
+                    type: GraphQLID
+                },
+            },
+            resolve: (_, { id }) => {
+                return posts.find((post) => post.id == id);
             }
         }
     })
