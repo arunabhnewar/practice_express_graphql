@@ -98,7 +98,7 @@ const PasswordType = new GraphQLScalarType({
             throw new GraphQLError(`Password is not string`)
         }
     },
-    // serialize: dateValidation,
+    serialize: passwordValidation,
 })
 
 
